@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Converter | Universal File Converter</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="glass">
+        <div class="logo">File Converter</div>
+        <button id="theme-toggle" class="theme-toggle">
+            <i class="fas fa-moon"></i>
+        </button>
+    </header>
+
+    <main>
+        <div class="tabs">
+            <button class="tab-btn active" data-target="converter">Converter</button>
+            <button class="tab-btn" data-target="pdf-tools">PDF Toolkit</button>
+            <button class="tab-btn" data-target="docs-tools">Docs Tools</button>
+        </div>
+
+        <!-- Converter Section -->
+        <section id="converter" class="section active">
+            <div class="card">
+                <h1>Universal Converter</h1>
+                <p style="color: var(--text-muted); margin-bottom: 2rem;">Convert images, documents, and media instantly.</p>
+                
+                <div class="drop-zone" id="conv-drop-zone">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Drag & Drop your file here or <strong>browse</strong></p>
+                    <input type="file" id="conv-file-input" hidden>
+                    <div id="file-info" style="margin-top: 1rem; font-weight: 600;"></div>
+                </div>
+
+                <div class="controls converter-row">
+                    <div class="select-group">
+                        <label>Convert</label>
+                        <select id="from-format">
+                            <option value="" disabled selected>Select Input Format</option>
+                            <optgroup label="Images">
+                                <option value="png">PNG</option>
+                                <option value="jpg">JPG / JPEG</option>
+                                <option value="webp">WEBP</option>
+                            </optgroup>
+                            <optgroup label="Documents">
+                                <option value="pdf">PDF</option>
+                                <option value="docx">DOCX</option>
+                                <option value="txt">TXT</option>
+                                <option value="html">HTML</option>
+                                <option value="md">Markdown</option>
+                            </optgroup>
+                            <optgroup label="Media">
+                                <option value="mp4">MP4 (Video)</option>
+                                <option value="wav">WAV (Audio)</option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <div class="converter-arrow">→</div>
+
+                    <div class="select-group">
+                        <label>to</label>
+                        <select id="target-format" disabled>
+                            <option value="" disabled selected>Select Output Format</option>
+                        </select>
+                    </div>
+
+                    <button class="primary-btn" id="convert-btn" disabled>Convert Now</button>
+                </div>
+
+                <div id="progress-container" style="display: none; margin-top: 1rem;">
+                    <p id="status-text">Processing...</p>
+                    <div style="height: 4px; background: var(--border); border-radius: 2px; overflow: hidden;">
+                        <div id="progress-bar" style="height: 100%; width: 0%; background: var(--primary); transition: width 0.3s;"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PDF Tools Section -->
+        <section id="pdf-tools" class="section">
+            <div class="card">
+                <h1>PDF Toolkit</h1>
+                <div class="controls">
+                    <div id="pdf-actions" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem;">
+                        <button class="tab-btn" style="border: 1px solid var(--border);" data-action="merge">Merge</button>
+                        <button class="tab-btn" style="border: 1px solid var(--border);" data-action="rotate">Rotate</button>
+                        <button class="tab-btn" style="border: 1px solid var(--border);" data-action="watermark">Watermark</button>
+                        <button class="tab-btn" style="border: 1px solid var(--border);" data-action="split">Split</button>
+                    </div>
+
+                    <div id="pdf-tool-area" style="margin-top: 2rem;">
+                         <!-- Dynamic tool content goes here -->
+                         <div class="drop-zone" id="pdf-drop-zone">
+                            <i class="fas fa-file-pdf"></i>
+                            <p>Select PDF action above</p>
+                         </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Docs Tools Section -->
+        <section id="docs-tools" class="section">
+            <div class="card">
+                <h1>Docs Toolkit</h1>
+                <p style="color: var(--text-muted); margin-bottom: 2rem;">Advanced manipulation for Word, Markdown, and HTML.</p>
+                
+                <div class="controls">
+                    <div id="docs-actions" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                        <button class="tab-btn sub-tab active" data-docs-action="md-to-pdf">MD to PDF</button>
+                        <button class="tab-btn sub-tab" data-docs-action="modify-docx">Modify DOCX</button>
+                        <button class="tab-btn sub-tab" data-docs-action="metadata">Metadata</button>
+                    </div>
+
+                    <div id="docs-tool-area">
+                        <!-- Dynamic sub-tool content -->
+                        <div class="drop-zone" id="docs-drop-zone">
+                            <i class="fas fa-file-word"></i>
+                            <p>Select a tool above to start</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="toast-container"></div>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
