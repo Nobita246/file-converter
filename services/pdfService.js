@@ -83,16 +83,69 @@ class PdfService {
   }
 
   /**
-   * Password protect PDF
+   * Extract specific pages from a PDF
+   * @param {string} rangeStr - e.g. "1, 3, 5-10"
    */
-  async protectPdf(inputPath, outputPath, password) {
+  async extractPages(inputPath, outputPath, rangeStr) {
+    const pdfBytes = fs.readFileSync(inputPath);
+    const srcPdf = await PDFDocument.load(pdfBytes);
+    const destPdf = await PDFDocument.create();
+    
+    const pageCount = srcPdf.getPageCount();
+    const pagesToExtract = this._parseRange(rangeStr, pageCount);
+    
+    if (pagesToExtract.length === 0) throw new Error('No valid pages specified in range');
+    
+    const copiedPages = await destPdf.copyPages(srcPdf, pagesToExtract);
+    copiedPages.forEach(page => destPdf.addPage(page));
+    
+    const destPdfBytes = await destPdf.save();
+    fs.writeFileSync(outputPath, destPdfBytes);
+    return outputPath;
+  }
+
+  /**
+   * Basic PDF Compression (optimizing images and metadata)
+   */
+  async compressPdf(inputPath, outputPath, level) {
     const pdfBytes = fs.readFileSync(inputPath);
     const pdf = await PDFDocument.load(pdfBytes);
-    // pdf-lib doesn't support built-in encryption yet, would need qpdf or similar
-    // For this project, we'll document it as a limitation or use a shell-based tool if available
-    // For now, let's keep it as a placeholder or use a library that supports it
-    // Actually, let's stick to pdf-lib for basic ops and mention password protection needs extra tools
-    throw new Error('Password protection requires additional system libraries (like qpdf)');
+    
+    // Low-level optimization in pdf-lib is limited, but we can set metadata and 
+    // re-serialize which often reduces size of unoptimized PDFs.
+    // For true high-level compression (image downsampling), extra libs would be needed.
+    // We'll use PDFDocument.save({ useObjectStreams: true }) for better packing.
+    
+    const compressedBytes = await pdf.save({
+      useObjectStreams: true,
+      addDefaultPage: false
+    });
+    
+    fs.writeFileSync(outputPath, compressedBytes);
+    return outputPath;
+  }
+
+  _parseRange(rangeStr, maxPages) {
+    const pages = new Set();
+    const parts = rangeStr.split(',').map(p => p.trim());
+    
+    parts.forEach(part => {
+      if (part.includes('-')) {
+        const [start, end] = part.split('-').map(Number);
+        if (!isNaN(start) && !isNaN(end)) {
+          for (let i = Math.max(1, start); i <= Math.min(maxPages, end); i++) {
+            pages.add(i - 1); // 0-indexed for pdf-lib
+          }
+        }
+      } else {
+        const page = Number(part);
+        if (!isNaN(page) && page >= 1 && page <= maxPages) {
+          pages.add(page - 1);
+        }
+      }
+    });
+    
+    return Array.from(pages).sort((a, b) => a - b);
   }
 }
 

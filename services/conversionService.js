@@ -91,6 +91,24 @@ class ConversionService {
         .save(outputPath);
     });
   }
+
+  /**
+   * Custom Image Resize
+   */
+  async resizeImage(inputPath, outputPath, options) {
+    const { width, height, maintainAspectRatio } = options;
+    const resizeOptions = {};
+    
+    if (width) resizeOptions.width = parseInt(width);
+    if (height) resizeOptions.height = parseInt(height);
+    if (maintainAspectRatio === false) resizeOptions.fit = 'fill';
+
+    await sharp(inputPath)
+      .resize(resizeOptions)
+      .toFile(outputPath);
+    
+    return outputPath;
+  }
 }
 
 module.exports = new ConversionService();

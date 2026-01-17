@@ -21,6 +21,7 @@
             <button class="tab-btn active" data-target="converter">Converter</button>
             <button class="tab-btn" data-target="pdf-tools">PDF Toolkit</button>
             <button class="tab-btn" data-target="docs-tools">Docs Tools</button>
+            <button class="tab-btn" data-target="controls">Controls</button>
         </div>
 
         <!-- Converter Section -->
@@ -36,40 +37,42 @@
                     <div id="file-info" style="margin-top: 1rem; font-weight: 600;"></div>
                 </div>
 
-                <div class="controls converter-row">
-                    <div class="select-group">
-                        <label>Convert</label>
-                        <select id="from-format">
-                            <option value="" disabled selected>Select Input Format</option>
-                            <optgroup label="Images">
-                                <option value="png">PNG</option>
-                                <option value="jpg">JPG / JPEG</option>
-                                <option value="webp">WEBP</option>
-                            </optgroup>
-                            <optgroup label="Documents">
-                                <option value="pdf">PDF</option>
-                                <option value="docx">DOCX</option>
-                                <option value="txt">TXT</option>
-                                <option value="html">HTML</option>
-                                <option value="md">Markdown</option>
-                            </optgroup>
-                            <optgroup label="Media">
-                                <option value="mp4">MP4 (Video)</option>
-                                <option value="wav">WAV (Audio)</option>
-                            </optgroup>
-                        </select>
+                <div class="control-options converter-controls">
+                    <div class="converter-row">
+                        <div class="select-group">
+                            <label>Convert</label>
+                            <select id="from-format">
+                                <option value="" disabled selected>Select Input Format</option>
+                                <optgroup label="Images">
+                                    <option value="png">PNG</option>
+                                    <option value="jpg">JPG / JPEG</option>
+                                    <option value="webp">WEBP</option>
+                                </optgroup>
+                                <optgroup label="Documents">
+                                    <option value="pdf">PDF</option>
+                                    <option value="docx">DOCX</option>
+                                    <option value="txt">TXT</option>
+                                    <option value="html">HTML</option>
+                                    <option value="md">Markdown</option>
+                                </optgroup>
+                                <optgroup label="Media">
+                                    <option value="mp4">MP4 (Video)</option>
+                                    <option value="wav">WAV (Audio)</option>
+                                </optgroup>
+                            </select>
+                        </div>
+
+                        <div class="converter-arrow">→</div>
+
+                        <div class="select-group">
+                            <label>to</label>
+                            <select id="target-format" disabled>
+                                <option value="" disabled selected>Select Output Format</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <div class="converter-arrow">→</div>
-
-                    <div class="select-group">
-                        <label>to</label>
-                        <select id="target-format" disabled>
-                            <option value="" disabled selected>Select Output Format</option>
-                        </select>
-                    </div>
-
-                    <button class="primary-btn" id="convert-btn" disabled>Convert Now</button>
+                    <button class="primary-btn" id="convert-btn" style="width: 100%; margin-top: 1.5rem;" disabled>Convert Now</button>
                 </div>
 
                 <div id="progress-container" style="display: none; margin-top: 1rem;">
@@ -85,6 +88,7 @@
         <section id="pdf-tools" class="section">
             <div class="card">
                 <h1>PDF Toolkit</h1>
+                <p style="color: var(--text-muted); margin-bottom: 2rem;">Merge, rotate, watermark, and split PDF documents.</p>
                 <div class="controls">
                     <div id="pdf-actions" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem;">
                         <button class="tab-btn" style="border: 1px solid var(--border);" data-action="merge">Merge</button>
@@ -127,6 +131,37 @@
                 </div>
             </div>
         </section>
+
+        <!-- Controls Section (Advanced Features) -->
+        <section id="controls" class="section">
+            <div class="card">
+                <h1>Advanced Controls</h1>
+                <p style="color: var(--text-muted); margin-bottom: 2rem;">Resize images, extract PDF pages, and compress documents.</p>
+                
+                <div class="controls">
+                    <div id="ctrl-actions" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                        <button class="tab-btn sub-tab active" data-ctrl-action="resizer">Image Resize</button>
+                        <button class="tab-btn sub-tab" data-ctrl-action="extractor">PDF Extractor</button>
+                        <button class="tab-btn sub-tab" data-ctrl-action="compressor">PDF Compress</button>
+                    </div>
+
+                    <div id="ctrl-tool-area">
+                        <div class="drop-zone" id="ctrl-drop-zone">
+                            <i class="fas fa-cogs"></i>
+                            <p>Choose an advanced tool to begin</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <!-- Global Preview Area (Shared) -->
+        <div id="global-preview-container" class="preview-area" style="display: none;">
+            <h3><i class="fas fa-eye"></i> Preview</h3>
+            <div id="preview-content" class="preview-frame"></div>
+            <div class="preview-actions">
+                <button class="primary-btn" id="download-after-preview">Download File</button>
+                <button class="secondary-btn" id="clear-preview">Clear</button>
+            </div>
+        </div>
     </main>
 
     <div id="toast-container"></div>

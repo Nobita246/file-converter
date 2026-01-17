@@ -38,10 +38,12 @@ app.get('/api/health', (req, res) => {
 const convertRoutes = require('./routes/convert');
 const pdfRoutes = require('./routes/pdf-tools');
 const docsRoutes = require('./routes/docs');
+const controlsRoutes = require('./routes/controls');
 
 app.use('/api/convert', convertRoutes);
 app.use('/api/pdf-tools', pdfRoutes);
 app.use('/api/docs', docsRoutes);
+app.use('/api/controls', controlsRoutes);
 
 // Periodic cleanup every hour
 const { cleanUploads } = require('./services/cleanupService');

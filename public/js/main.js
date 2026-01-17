@@ -194,24 +194,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 <i class="fas fa-layer-group"></i>
                 <p>Drag & Drop multiple PDFs to merge</p>
                 <input type="file" id="pdf-merge-input" multiple accept="application/pdf" hidden>
-                <div id="pdf-merge-list" style="margin-top: 1rem; text-align: left; font-size: 0.9rem;"></div>
+                <div id="pdf-merge-list" style="margin-top: 1rem; width: 100%;"></div>
             </div>
-            <button class="primary-btn" id="pdf-merge-btn" style="width: 100%; margin-top: 1rem;" disabled>Merge & Download</button>
+            <div class="control-options">
+                <button class="primary-btn" id="pdf-merge-btn" style="width: 100%;" disabled>Merge & Preview</button>
+            </div>
         `,
         rotate: `
             <div class="drop-zone" id="pdf-rotate-drop">
                 <i class="fas fa-redo"></i>
                 <p>Select PDF to rotate</p>
                 <input type="file" id="pdf-rotate-input" accept="application/pdf" hidden>
-                <div id="pdf-rotate-name" style="margin-top: 1rem; font-weight: 600;"></div>
+                <div id="pdf-rotate-name" class="file-info-text"></div>
             </div>
-            <div class="controls">
-                <select id="pdf-rotate-angle">
-                    <option value="90">90° Clockwise</option>
-                    <option value="180">180°</option>
-                    <option value="270">270° Counter-Clockwise</option>
-                </select>
-                <button class="primary-btn" id="pdf-rotate-btn" disabled>Rotate & Download</button>
+            <div class="control-options">
+                <div class="input-row">
+                    <label>Rotation Angle</label>
+                    <select id="pdf-rotate-angle">
+                        <option value="90">90° Clockwise</option>
+                        <option value="180">180°</option>
+                        <option value="270">270° Counter-Clockwise</option>
+                    </select>
+                </div>
+                <button class="primary-btn" id="pdf-rotate-btn" style="width: 100%;" disabled>Rotate & Preview</button>
             </div>
         `,
         watermark: `
@@ -219,11 +224,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 <i class="fas fa-stamp"></i>
                 <p>Select PDF to watermark</p>
                 <input type="file" id="pdf-wm-input" accept="application/pdf" hidden>
-                <div id="pdf-wm-name" style="margin-top: 1rem; font-weight: 600;"></div>
+                <div id="pdf-wm-name" class="file-info-text"></div>
             </div>
-            <div class="controls">
-                <input type="text" id="pdf-wm-text" placeholder="Enter Watermark Text (e.g. CONFIDENTIAL)">
-                <button class="primary-btn" id="pdf-wm-btn" disabled>Apply & Download</button>
+            <div class="control-options">
+                <div class="input-row">
+                    <label>Watermark Text</label>
+                    <input type="text" id="pdf-wm-text" placeholder="e.g. CONFIDENTIAL">
+                </div>
+                <button class="primary-btn" id="pdf-wm-btn" style="width: 100%;" disabled>Apply & Preview</button>
             </div>
         `,
         split: `
@@ -231,9 +239,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 <i class="fas fa-scissors"></i>
                 <p>Select PDF to split into separate pages</p>
                 <input type="file" id="pdf-split-input" accept="application/pdf" hidden>
-                <div id="pdf-split-name" style="margin-top: 1rem; font-weight: 600;"></div>
+                <div id="pdf-split-name" class="file-info-text"></div>
             </div>
-            <button class="primary-btn" id="pdf-split-btn" style="width: 100%; margin-top: 1rem;" disabled>Split & Download (.zip)</button>
+            <div class="control-options">
+                <button class="primary-btn" id="pdf-split-btn" style="width: 100%;" disabled>Split & Preview (.zip)</button>
+            </div>
         `
     };
 
@@ -301,7 +311,7 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.onclick = async () => {
                 const formData = new FormData();
                 files.forEach(f => formData.append('files', f));
-                await handlePdfApiCall('/api/pdf-tools/merge', formData, 'merged.pdf');
+                await handleProcessingWithPreview('/api/pdf-tools/merge', formData, 'merged.pdf', 'application/pdf');
             };
 
         } else if (action === 'rotate') {
@@ -337,7 +347,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const formData = new FormData();
                 formData.append('file', file);
                 formData.append('angle', angleSelect.value);
-                await handlePdfApiCall('/api/pdf-tools/rotate', formData, 'rotated.pdf');
+                await handleProcessingWithPreview('/api/pdf-tools/rotate', formData, 'rotated.pdf', 'application/pdf');
             };
 
         } else if (action === 'watermark') {
@@ -375,7 +385,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const formData = new FormData();
                 formData.append('file', file);
                 formData.append('text', text);
-                await handlePdfApiCall('/api/pdf-tools/watermark', formData, 'watermarked.pdf');
+                await handleProcessingWithPreview('/api/pdf-tools/watermark', formData, 'watermarked.pdf', 'application/pdf');
             };
         } else if (action === 'split') {
             const drop = document.getElementById('pdf-split-drop');
@@ -408,7 +418,8 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.onclick = async () => {
                 const formData = new FormData();
                 formData.append('file', file);
-                await handlePdfApiCall('/api/pdf-tools/split', formData, 'pages.zip');
+                // ZIP outputs don't preview, but we'll use the preview area for consistent download UI
+                await handleProcessingWithPreview('/api/pdf-tools/split', formData, 'pages.zip', 'application/zip');
             };
         }
     }
@@ -423,14 +434,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 <i class="fab fa-markdown"></i>
                 <p>Select Markdown file (.md)</p>
                 <input type="file" id="docs-md-input" accept=".md" hidden>
-                <div id="docs-md-name" style="margin-top: 1rem; font-weight: 600;"></div>
+                <div id="docs-md-name" class="file-info-text"></div>
             </div>
-            <div class="options-panel">
-                <div style="display: flex; gap: 1rem; align-items: center;">
-                    <label>Line Spacing:</label>
-                    <input type="number" id="md-line-spacing" value="1.6" step="0.1" style="width: 80px;">
+            <div class="control-options">
+                <div class="input-row">
+                    <label>Line Spacing</label>
+                    <input type="number" id="md-line-spacing" value="1.6" step="0.1">
                 </div>
-                <button class="primary-btn" id="docs-md-btn" disabled>Convert to PDF</button>
+                <button class="primary-btn" id="docs-md-btn" style="width: 100%;" disabled>Convert to PDF</button>
             </div>
         `,
         'modify-docx': `
@@ -438,23 +449,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 <i class="fas fa-file-word"></i>
                 <p>Select DOCX file to modify</p>
                 <input type="file" id="docs-docx-input" accept=".docx" hidden>
-                <div id="docs-docx-name" style="margin-top: 1rem; font-weight: 600;"></div>
+                <div id="docs-docx-name" class="file-info-text"></div>
             </div>
-            <div class="options-panel">
-                <label class="checkbox-group"><input type="checkbox" id="remove-images"> Remove All Images</label>
-                <label class="checkbox-group"><input type="checkbox" id="remove-links"> Remove Hyperlinks</label>
-                <button class="primary-btn" id="docs-modify-btn" disabled>Apply Changes</button>
+            <div class="control-options">
+                <div class="input-row">
+                    <label class="checkbox-group"><input type="checkbox" id="remove-images"> Remove All Images</label>
+                </div>
+                <div class="input-row">
+                    <label class="checkbox-group"><input type="checkbox" id="remove-links"> Remove Hyperlinks</label>
+                </div>
+                <button class="primary-btn" id="docs-modify-btn" style="width: 100%;" disabled>Apply Changes</button>
             </div>
         `,
         'metadata': `
             <div class="drop-zone" id="docs-meta-drop">
                 <i class="fas fa-search"></i>
-                <p>Select Document to view metadata</p>
+                <p>Select Document for Metadata</p>
                 <input type="file" id="docs-meta-input" accept=".docx" hidden>
-                <div id="docs-meta-name" style="margin-top: 1rem; font-weight: 600;"></div>
+                <div id="docs-meta-name" class="file-info-text"></div>
             </div>
-            <button class="primary-btn" id="docs-meta-btn" style="width: 100%; margin-top: 1rem;" disabled>Extract Metadata</button>
-            <div id="meta-result" class="metadata-display" style="display: none;"></div>
+            <div class="control-options">
+                <button class="primary-btn" id="docs-meta-btn" style="width: 100%;" disabled>Extract Metadata</button>
+                <div id="meta-result" class="metadata-display" style="display: none; margin-top: 1rem;"></div>
+            </div>
         `
     };
 
@@ -489,7 +506,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const formData = new FormData();
                 formData.append('file', file);
                 formData.append('options', JSON.stringify({ lineSpacing: spacing.value }));
-                await handlePdfApiCall('/api/docs/convert', formData, 'document.pdf');
+                await handleProcessingWithPreview('/api/docs/convert', formData, 'document.pdf', 'application/pdf');
             };
 
         } else if (action === 'modify-docx') {
@@ -511,7 +528,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 formData.append('file', file);
                 formData.append('removeImages', document.getElementById('remove-images').checked);
                 formData.append('removeLinks', document.getElementById('remove-links').checked);
-                await handlePdfApiCall('/api/docs/modify', formData, `modified_${file.name}`);
+                await handleProcessingWithPreview('/api/docs/modify', formData, `modified_${file.name}`, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
             };
 
         } else if (action === 'metadata') {
@@ -553,39 +570,254 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    async function handlePdfApiCall(url, formData, defaultName) {
-        updateProgress(true, 'Processing PDF...', 50);
+
+    // --- Advanced Controls Logic ---
+    const ctrlToolArea = document.getElementById('ctrl-tool-area');
+    const ctrlActions = document.querySelectorAll('[data-ctrl-action]');
+
+    const ctrlTemplates = {
+        resizer: `
+            <div class="drop-zone" id="ctrl-resize-drop">
+                <i class="fas fa-expand-arrows-alt"></i>
+                <p>Select Image to Resize</p>
+                <input type="file" id="ctrl-resize-input" accept="image/*" hidden>
+                <div id="ctrl-resize-name" class="file-info-text"></div>
+            </div>
+            <div class="control-options">
+                <div class="input-row">
+                    <label>Width (px)</label>
+                    <input type="number" id="resize-width" placeholder="Auto">
+                </div>
+                <div class="input-row">
+                    <label>Height (px)</label>
+                    <input type="number" id="resize-height" placeholder="Auto">
+                </div>
+                <div class="input-row">
+                    <label class="checkbox-group">
+                        <input type="checkbox" id="resize-aspect" checked> Maintain Aspect Ratio
+                    </label>
+                </div>
+                <button class="primary-btn" id="ctrl-resize-btn" style="width: 100%;" disabled>Resize & Preview</button>
+            </div>
+        `,
+        extractor: `
+            <div class="drop-zone" id="ctrl-extract-drop">
+                <i class="fas fa-file-pdf"></i>
+                <p>Select PDF to Extract Pages</p>
+                <input type="file" id="ctrl-extract-input" accept="application/pdf" hidden>
+                <div id="ctrl-extract-name" class="file-info-text"></div>
+            </div>
+            <div class="control-options">
+                <div class="input-row">
+                    <label>Page Range (e.g. 1, 3, 5-10)</label>
+                    <input type="text" id="extract-range" placeholder="Enter ranges...">
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-muted); text-align: center; margin-bottom: 0.5rem;">Total Pages Available: <span id="extract-total-pages" style="font-weight: 800;">-</span></p>
+                <button class="primary-btn" id="ctrl-extract-btn" style="width: 100%;" disabled>Extract & Preview</button>
+            </div>
+        `,
+        compressor: `
+            <div class="drop-zone" id="ctrl-compress-drop">
+                <i class="fas fa-compress-arrows-alt"></i>
+                <p>Select PDF to Compress</p>
+                <input type="file" id="ctrl-compress-input" accept="application/pdf" hidden>
+                <div id="ctrl-compress-name" class="file-info-text"></div>
+            </div>
+            <div class="control-options">
+                <div class="input-row">
+                    <label>Compression Level</label>
+                    <select id="compress-level">
+                        <option value="low">Low (Highest Quality)</option>
+                        <option value="medium" selected>Medium (Balanced)</option>
+                        <option value="high">High (Maximum Compression)</option>
+                    </select>
+                </div>
+                <button class="primary-btn" id="ctrl-compress-btn" style="width: 100%; margin-top: 0.5rem;" disabled>Compress & Preview</button>
+            </div>
+        `
+    };
+
+    ctrlActions.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const action = btn.getAttribute('data-ctrl-action');
+            ctrlActions.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            ctrlToolArea.innerHTML = ctrlTemplates[action];
+            initCtrlLogic(action);
+        });
+    });
+
+    function initCtrlLogic(action) {
+        if (action === 'resizer') {
+            const drop = document.getElementById('ctrl-resize-drop');
+            const input = document.getElementById('ctrl-resize-input');
+            const name = document.getElementById('ctrl-resize-name');
+            const btn = document.getElementById('ctrl-resize-btn');
+            let file = null;
+
+            drop.onclick = () => input.click();
+            input.onchange = (e) => {
+                file = e.target.files[0];
+                name.textContent = file ? `Selected: ${file.name}` : '';
+                btn.disabled = !file;
+            };
+
+            btn.onclick = async () => {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('width', document.getElementById('resize-width').value);
+                formData.append('height', document.getElementById('resize-height').value);
+                formData.append('maintainAspectRatio', document.getElementById('resize-aspect').checked);
+                await handleProcessingWithPreview('/api/controls/resize', formData, `resized_${file.name}`, file.type);
+            };
+
+        } else if (action === 'extractor') {
+            const drop = document.getElementById('ctrl-extract-drop');
+            const input = document.getElementById('ctrl-extract-input');
+            const name = document.getElementById('ctrl-extract-name');
+            const btn = document.getElementById('ctrl-extract-btn');
+            const totalDisplay = document.getElementById('extract-total-pages');
+            let file = null;
+
+            drop.onclick = () => input.click();
+            input.onchange = async (e) => {
+                file = e.target.files[0];
+                if (file) {
+                    name.textContent = `Selected: ${file.name}`;
+                    btn.disabled = false;
+                    // Detect pages if possible (client-side PDF reading)
+                    try {
+                        const reader = new FileReader();
+                        reader.onload = function() {
+                            const count = this.result.match(/\/Type\s*\/Page\b/g).length;
+                            totalDisplay.textContent = count;
+                        };
+                        reader.readAsBinaryString(file);
+                    } catch(err) { console.log('Page detection failed'); }
+                }
+            };
+
+            btn.onclick = async () => {
+                const range = document.getElementById('extract-range').value.trim();
+                if (!range) return showToast('Enter page range', '#f44336');
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('range', range);
+                await handleProcessingWithPreview('/api/controls/extract', formData, `extracted_${file.name}`, 'application/pdf');
+            };
+
+        } else if (action === 'compressor') {
+            const drop = document.getElementById('ctrl-compress-drop');
+            const input = document.getElementById('ctrl-compress-input');
+            const name = document.getElementById('ctrl-compress-name');
+            const btn = document.getElementById('ctrl-compress-btn');
+            let file = null;
+
+            drop.onclick = () => input.click();
+            input.onchange = (e) => {
+                file = e.target.files[0];
+                name.textContent = file ? `Selected: ${file.name}` : '';
+                btn.disabled = !file;
+            };
+
+            btn.onclick = async () => {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('level', document.getElementById('compress-level').value);
+                await handleProcessingWithPreview('/api/controls/compress', formData, `compressed_${file.name}`, 'application/pdf');
+            };
+        }
+    }
+
+    // --- Core Processing with Global Preview ---
+    const previewContainer = document.getElementById('global-preview-container');
+    const previewContent = document.getElementById('preview-content');
+    const downloadBtn = document.getElementById('download-after-preview');
+    const clearPreviewBtn = document.getElementById('clear-preview');
+    let currentPreviewBlob = null;
+    let currentDownloadName = '';
+
+    async function handleProcessingWithPreview(url, formData, defaultName, type) {
+        updateProgress(true, 'Processing & Generating Preview...', 50);
+        previewContainer.style.display = 'none';
+
         try {
             const response = await fetch(url, { method: 'POST', body: formData });
-            
-            if (!response.ok) {
-                let errorMessage = 'Something went wrong. Please try again.';
-                try {
-                    const errData = await response.json();
-                    errorMessage = errData.error || errData.message || errorMessage;
-                } catch (e) {
-                    // Not JSON, use custom message based on status
-                    if (response.status === 404) errorMessage = 'Conversion service not found. Please restart the server.';
-                    if (response.status === 413) errorMessage = 'File is too large! Maximum limit is 50MB.';
-                }
-                throw new Error(errorMessage);
-            }
+            if (!response.ok) throw new Error('Processing failed');
 
             const blob = await response.blob();
-            const downloadUrl = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = downloadUrl;
-            a.download = defaultName;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            showToast('Success! Your file is ready.', '#6366f1');
+            currentPreviewBlob = blob;
+            currentDownloadName = defaultName;
+
+            showPreview(blob, type);
+            showToast('Ready for preview!', '#6366f1');
         } catch (error) {
             showToast(error.message, '#f44336');
         } finally {
             updateProgress(false);
         }
     }
+
+    function showPreview(blob, type) {
+        // Move preview to active section card for contextual visibility
+        const activeSection = document.querySelector('.section.active');
+        if (activeSection) {
+            activeSection.appendChild(previewContainer);
+        }
+
+        const url = URL.createObjectURL(blob);
+        previewContent.innerHTML = '';
+        previewContainer.style.display = 'block';
+
+        if (type.startsWith('image/')) {
+            const img = document.createElement('img');
+            img.src = url;
+            previewContent.appendChild(img);
+        } else if (type === 'application/pdf') {
+            const iframe = document.createElement('iframe');
+            iframe.src = url;
+            previewContent.appendChild(iframe);
+        } else {
+            previewContent.textContent = "Preview not available for this file type. Click download below.";
+        }
+
+        previewContainer.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    downloadBtn.onclick = () => {
+        if (!currentPreviewBlob) return;
+        const url = URL.createObjectURL(currentPreviewBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = currentDownloadName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    };
+
+    clearPreviewBtn.onclick = () => {
+        previewContainer.style.display = 'none';
+        previewContent.innerHTML = '';
+        currentPreviewBlob = null;
+    };
+
+    // Update main converter to use preview
+    const originalConvertBtnClick = convertBtn.onclick; 
+    // We'll replace the existing one for more consistency
+    convertBtn.onclick = async () => {
+        if (!selectedFile) return;
+        const targetFormat = targetFormatSelect.value;
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+        formData.append('targetFormat', targetFormat);
+
+        // Map target format to MIME type for preview
+        let previewType = 'application/octet-stream';
+        if (['jpg', 'png', 'webp'].includes(targetFormat)) previewType = `image/${targetFormat}`;
+        if (targetFormat === 'pdf') previewType = 'application/pdf';
+
+        await handleProcessingWithPreview('/api/convert', formData, `converted_${selectedFile.name.split('.')[0]}.${targetFormat}`, previewType);
+    };
 
     // --- Helpers ---
     function showToast(message, color) {
@@ -603,8 +835,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const status = document.getElementById('status-text');
         const bar = document.getElementById('progress-bar');
 
-        container.style.display = show ? 'block' : 'none';
-        status.textContent = text;
-        bar.style.width = `${percent}%`;
+        if (container) container.style.display = show ? 'block' : 'none';
+        if (status) status.textContent = text;
+        if (bar) bar.style.width = `${percent}%`;
     }
 });

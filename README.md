@@ -14,6 +14,7 @@ A redesigned conversion engine that ensures 100% valid file processing through a
   - Extract Audio (MP3) from MP4 Videos.
   - Create high-quality GIFs from MP4 clips using `fluent-ffmpeg`.
 - **✍️ Markdown**: Convert MD files to clean HTML or PDFs with syntax highlighting.
+- **🔍 Global Preview**: Interactive visual preview for images and PDFs before you download.
 
 ### 2. PDF Toolkit
 A high-performance module for managing PDF documents directly in the browser.
@@ -27,6 +28,12 @@ Built for power users needing deeper document control.
 - **🛠 DOCX Modification**: Strip all images or hyperlinks from Word documents to create "clean" versions.
 - **🔍 Metadata Inspector**: Extract internal document properties (Author, Created Date, Application Version, etc.) from DOCX files.
 - **💻 Markdown to PDF**: Renders Markdown with full **Code Syntax Highlighting** (via `highlight.js`) and custom line spacing.
+
+### 4. Advanced Controls (Panel) 🕹️
+A dedicated tab for surgical precision over your media and documents.
+- **🖼 Image Resizer**: Adjust dimensions with custom width/height and optional aspect ratio locking.
+- **📄 PDF Extractor**: Extract specific pages or ranges (e.g., 1, 3, 5-10) into a new PDF.
+- **🗜 PDF Compressor**: Optimize and re-serialize PDF files for reduced file size.
 
 ---
 
@@ -69,10 +76,10 @@ Built for power users needing deeper document control.
 - **Core Libraries**:
   - `sharp`: Image resizing and format conversion.
   - `puppeteer`: Chrome-based PDF generation from HTML/MD.
-  - `pdf-lib`: Native PDF editing (merging, rotating).
+  - `pdf-lib`: Native PDF editing (merging, rotating, extracting).
   - `docx` & `pizzip`: Direct XML manipulation of Word documents.
   - `marked` & `highlight.js`: Markdown parsing and syntax highlighting.
-  - `fluent-ffmpeg`: Command-line media processing.
+  - `fluent-ffmpeg`: Media processing and GIF generation.
 
 ---
 
@@ -84,13 +91,3 @@ Built for power users needing deeper document control.
 - **Modern Security**: `Helmet` middleware integrated for setting secure HTTP headers.
 
 ---
-
-## 🛠 Development
-To contribute or modify conversion logic:
-- Add new conversion routes in `/routes`
-- Implement new processing logic in `/services`
-- Update the UI templates in `/public/js/main.js`
-
----
-
-Made with ❤️ by Antigravity
